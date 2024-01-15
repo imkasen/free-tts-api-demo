@@ -1,0 +1,28 @@
+[tool.poetry]
+name = "free-tts-api-demo"
+version = "0.1.0"
+description = "Some examples of free TTS API calls for testing and learning."
+authors = ["Kasen"]
+readme = "README.md"
+
+[tool.poetry.dependencies]
+python = "^3.11"
+requests = "^2.31.0"
+gradio = "^4.13.0"
+loguru = "^0.7.2"
+
+
+[[tool.poetry.source]]
+name = "mirrors"
+url = "https://mirror.sjtu.edu.cn/pypi/web/simple"
+priority = "default"
+
+
+[tool.poetry.group.dev.dependencies]
+black = "^23.12.1"
+pylint = "^3.0.3"
+isort = "^5.13.2"
+
+[build-system]
+requires = ["poetry-core"]
+build-backend = "poetry.core.masonry.api"
