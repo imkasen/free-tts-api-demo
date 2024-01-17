@@ -13,5 +13,8 @@ def get_languages(url: str, token: str) -> gr.Dropdown:
     :param token: developer token
     :return: list of languages
     """
-    languages_list: list[str] = TTSMaker.get_languages(url, token)
-    return gr.Dropdown(choices=languages_list)
+    try:
+        languages_list: list[str] = TTSMaker.get_languages(url, token)
+        return gr.Dropdown(choices=languages_list)
+    except (KeyError, RuntimeError) as e:
+        raise gr.Error(e)

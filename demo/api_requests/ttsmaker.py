@@ -50,7 +50,7 @@ class TTSMaker:
                     tmp_dict[lang] = []
                 tmp_dict[lang].append(speaker_info_dict)
             except KeyError as e:  # if key "language" is missing
-                logger.critical(f"Key 'language' is missing: {e}")
+                logger.critical(e)
                 raise KeyError(e) from e
         return tmp_dict
 
@@ -81,8 +81,7 @@ class TTSMaker:
                         logger.critical(f"Unknown error code: {error_code}")
                         raise RuntimeError(f"Unknown error code: {error_code}")
             except requests.exceptions.RequestException as e:
-                # TODO: gradio.error
-                logger.critical(f"Fail to get voice list information: {e}")
+                logger.critical(e)
                 raise RuntimeError(e) from e
 
     @classmethod
