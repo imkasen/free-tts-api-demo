@@ -5,7 +5,7 @@ from typing import NoReturn
 
 import requests
 from loguru import logger
-from tinydb import TinyDB
+from tinydb import Query, TinyDB
 from tinydb.storages import MemoryStorage
 
 
@@ -14,7 +14,8 @@ class TTSMaker:
     TTSMaker Class
     """
 
-    language_list: list[str] | None = None
+    language_list: list[str] = []
+    voices_list: list[tuple[str, int]] = []
     voices_db = TinyDB(storage=MemoryStorage)
 
     @classmethod
@@ -66,12 +67,31 @@ class TTSMaker:
         return cls.language_list
 
     @classmethod
+    def get_voices(cls, url: str, token: str, language: str) -> list[tuple[str, int]]:
+        """
+        return supported voices list
+
+        :param url: URL of TTSMaker API
+        :param token: developer token
+        :param language: user selected language
+        :return: a list of multiple tuples consisting of names and ids
+        """
+        if not cls.voices_db.all():
+            cls.get_voice_list(url, token)
+        if not cls.voices_list:
+            for voice_info in cls.voices_db.search(Query().language == language):
+                cls.voices_list.append((voice_info["name"], voice_info["id"]))
+        return cls.voices_list
+
+    @classmethod
     def clear_info(cls) -> bool:
         """
         Clear all stored information
         """
         if cls.language_list:
-            cls.language_list = None
+            cls.language_list = []
+        if cls.voices_list:
+            cls.voices_list = []
         if cls.voices_db.all():
             cls.voices_db.truncate()
         return (not cls.language_list) and (not cls.voices_db.all())
