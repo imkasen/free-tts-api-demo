@@ -27,12 +27,12 @@ class TTSMaker:
             "he":
             [
                 {
-                "id": 116,
-                "name": "🔥Alina-🇮🇱 Israel FeMale (Hot + Unlimited)",
-                "gender": 2,
-                "is_need_queue": false,
-                "audio_sample_file_url": "https://s2.tts-file.com/samples/116.mp3",
-                "text_characters_limit": 9000
+                    "id": 116,
+                    "name": "🔥Alina-🇮🇱 Israel FeMale (Hot + Unlimited)",
+                    "gender": 2,
+                    "is_need_queue": false,
+                    "audio_sample_file_url": "https://s2.tts-file.com/samples/116.mp3",
+                    "text_characters_limit": 9000
                 },
                 ...
             ],
@@ -71,7 +71,6 @@ class TTSMaker:
                     if not error_code:
                         res_dict: dict[str, Any] = res.json()
                         cls.voice_info["support_language_list"] = res_dict["support_language_list"]
-                        cls.voice_info["voices_id_list"] = res_dict["voices_id_list"]
                         cls.voice_info["voices_detailed_list"] = cls.process_detailed_voices_list(
                             res_dict["voices_detailed_list"]
                         )
@@ -93,6 +92,6 @@ class TTSMaker:
         :param token: developer token
         :return: list of languages
         """
-        if (not cls.voice_info) or (not cls.voice_info["support_language_list"]):
+        if not cls.voice_info:
             cls.get_voice_list(url, token)
         return cls.voice_info["support_language_list"]
