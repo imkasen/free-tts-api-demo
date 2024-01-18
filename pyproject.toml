@@ -10,6 +10,7 @@ python = "^3.11"
 requests = "^2.31.0"
 gradio = "^4.13.0"
 loguru = "^0.7.2"
+tinydb = "^4.8.0"
 
 
 [[tool.poetry.source]]

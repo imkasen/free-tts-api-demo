@@ -21,5 +21,15 @@ def get_ttsmaker_languages(url: str, token: str) -> gr.Dropdown:
     try:
         languages_list: list[str] = TTSMaker.get_languages(url, token)
         return gr.Dropdown(choices=languages_list)
-    except (KeyError, RuntimeError) as e:
+    except RuntimeError as e:
         raise gr.Error(e)
+
+
+def clear_ttsmaker_info():
+    """
+    Clear all stored TTSMaker information
+    """
+    if TTSMaker.clear_info():
+        gr.Warning("Clear all stored TTSMaker information")
+    else:
+        raise gr.Error("Fail to clear TTSMaker information")

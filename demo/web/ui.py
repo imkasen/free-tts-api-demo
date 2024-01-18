@@ -3,7 +3,7 @@ User Interface
 """
 import gradio as gr
 
-from .ui_logic import get_ttsmaker_languages
+from .ui_logic import clear_ttsmaker_info, get_ttsmaker_languages
 
 # Gradio UI
 with gr.Blocks(title="Free TTS API Demo") as demo:
@@ -48,6 +48,14 @@ with gr.Blocks(title="Free TTS API Demo") as demo:
 
             with gr.Column():
                 ttsmaker_audio_output = gr.Audio(label="TTS Result", interactive=False)
+
+    ttsmaker_clear_button.add(
+        components=[
+            ttsmaker_languages_input,
+            ttsmaker_voices_input,
+        ]
+    )
+    ttsmaker_clear_button.click(fn=clear_ttsmaker_info)  # pylint: disable=E1101
 
     ttsmaker_languages_input.focus(  # pylint: disable=E1101
         fn=get_ttsmaker_languages,
