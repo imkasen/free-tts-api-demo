@@ -15,7 +15,6 @@ class TTSMaker:
     """
 
     language_list: list[str] = []
-    voices_list: list[tuple[str, int]] = []
     voices_db = TinyDB(storage=MemoryStorage)
 
     @classmethod
@@ -78,10 +77,10 @@ class TTSMaker:
         """
         if not cls.voices_db.all():
             cls.get_voice_list(url, token)
-        if not cls.voices_list:
-            for voice_info in cls.voices_db.search(Query().language == language):
-                cls.voices_list.append((voice_info["name"], voice_info["id"]))
-        return cls.voices_list
+        voices_list: list[tuple[str, int]] = [
+            (voice_info["name"], voice_info["id"]) for voice_info in cls.voices_db.search(Query().language == language)
+        ]
+        return voices_list
 
     @classmethod
     def clear_info(cls) -> bool:
@@ -90,8 +89,6 @@ class TTSMaker:
         """
         if cls.language_list:
             cls.language_list = []
-        if cls.voices_list:
-            cls.voices_list = []
         if cls.voices_db.all():
             cls.voices_db.truncate()
         return (not cls.language_list) and (not cls.voices_db.all())
