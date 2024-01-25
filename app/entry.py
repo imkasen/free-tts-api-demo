@@ -1,10 +1,10 @@
 """
 Project entry file
 """
-from web import demo
+from web import ui
 
 if __name__ == "__main__":
-    demo.queue().launch(
+    ui.queue().launch(
         inbrowser=True,
         show_api=False,
         share=False,

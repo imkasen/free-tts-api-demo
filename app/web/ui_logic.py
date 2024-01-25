@@ -2,7 +2,7 @@
 Some logic funtions needed by Gradio components
 """
 import gradio as gr
-from api_requests import TTSMaker
+from api import TTSMaker
 
 
 def get_ttsmaker_languages(url: str, token: str) -> gr.Dropdown:

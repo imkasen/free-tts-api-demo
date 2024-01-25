@@ -1,4 +1,4 @@
 """
 Gradio web module
 """
-from .ui import demo
+from .ui import ui

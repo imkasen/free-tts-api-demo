@@ -6,7 +6,7 @@ import gradio as gr
 from .ui_logic import clear_ttsmaker_info, get_ttsmaker_languages, get_ttsmaker_voices
 
 # Gradio UI
-with gr.Blocks(title="Free TTS API Demo") as demo:
+with gr.Blocks(title="Free TTS API Demo") as ui:
     gr.HTML(value="""<h1 align="center">Free TTS API Demo</h1>""")
     # TTS Maker
     with gr.Tab(label="TTSMaker"):
