@@ -17,7 +17,7 @@ with gr.Blocks(title="Free TTS API Demo") as ui:
                     value="ttsmaker_demo_token",
                     interactive=True,
                 )
-                ttsmaker_url_input = gr.Dropdown(
+                ttsmaker_url_input = gr.Radio(
                     label="API URL",
                     info="Select TTSMaker API url based on your localtion.",
                     choices=["api.ttsmaker.com", "api.ttsmaker.cn"],
@@ -58,11 +58,50 @@ with gr.Blocks(title="Free TTS API Demo") as ui:
                     visible=False,
                 )
 
+                ttsmaker_audio_format = gr.Dropdown(
+                    label="Audio Format",
+                    choices=["mp3", "ogg", "acc", "opus", "wav"],
+                    value="mp3",
+                    interactive=True,
+                )
+
+                ttsmaker_audio_speed = gr.Slider(
+                    label="Audio Speed",
+                    info=r"0.5: 50% speed, 1.0: 100% speed, 2.0: 200% speed",
+                    value=1.0,
+                    minimum=0.5,
+                    maximum=2.0,
+                    step=0.5,
+                    interactive=True,
+                )
+
+                ttsmaker_audio_volume = gr.Slider(
+                    label="Audio Volume",
+                    info="1: volume + 10%, 8: volume + 80%, 10: volume + 100%",
+                    value=0.0,
+                    minimum=0.0,
+                    maximum=10.0,
+                    step=1.0,
+                    interactive=True,
+                )
+
+                ttsmaker_text_pause_time = gr.Slider(
+                    label="Text Paragraph Pause Time",
+                    info="""Auto insert audio paragraph pause time. \
+                        unit: second, maximum 50 pauses can be inserted. \
+                        If more than 50 pauses, all pauses will be canceled automatically. """,
+                    value=0.0,
+                    minimum=0.5,
+                    maximum=5.0,
+                    step=0.1,
+                    interactive=True,
+                )
+
+            with gr.Column():
+                ttsmaker_text_input = gr.Textbox(placeholder="Input text here...", container=False)
                 with gr.Row():
                     ttsmaker_clear_button = gr.ClearButton(value="Clear")
                     ttsmaker_submit_button = gr.Button(value="Submit", variant="primary")
-
-            with gr.Column():
                 ttsmaker_audio_output = gr.Audio(label="TTS Result", interactive=False)
 
     ttsmaker_clear_button.add(
