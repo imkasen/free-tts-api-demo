@@ -3,7 +3,7 @@ User Interface
 """
 import gradio as gr
 
-from .ui_logic import clear_ttsmaker_info, get_ttsmaker_languages, get_ttsmaker_voices
+from .ui_logic import clear_ttsmaker_info, get_ttsmaker_languages, get_ttsmaker_single_voice_info, get_ttsmaker_voices
 
 # Gradio UI
 with gr.Blocks(title="Free TTS API Demo") as ui:
@@ -36,11 +36,27 @@ with gr.Blocks(title="Free TTS API Demo") as ui:
                 )
 
                 with gr.Row():
-                    ttsmaker_queue = gr.Textbox(value="False", label="Queue", interactive=False)
-                    ttsmaker_gender = gr.Textbox(value="Male", label="Gender", interactive=False)
-                    ttsmaker_txt_limit = gr.Textbox(value="3000", label="Text characters limit", interactive=False)
+                    ttsmaker_gender = gr.Textbox(
+                        label="Gender",
+                        interactive=False,
+                        visible=False,
+                    )
+                    ttsmaker_queue = gr.Textbox(
+                        label="Queue",
+                        interactive=False,
+                        visible=False,
+                    )
+                    ttsmaker_txt_limit = gr.Textbox(
+                        label="Text Characters Limit",
+                        interactive=False,
+                        visible=False,
+                    )
 
-                ttsmaker_sample_audio = gr.Audio(label="Voice Sample", interactive=False)
+                ttsmaker_sample_audio = gr.Audio(
+                    label="Voice Sample",
+                    interactive=False,
+                    visible=False,
+                )
 
                 with gr.Row():
                     ttsmaker_clear_button = gr.ClearButton(value="Clear")
@@ -53,9 +69,16 @@ with gr.Blocks(title="Free TTS API Demo") as ui:
         components=[
             ttsmaker_languages_input,
             ttsmaker_voices_input,
+            ttsmaker_gender,
+            ttsmaker_queue,
+            ttsmaker_txt_limit,
+            ttsmaker_sample_audio,
         ]
     )
-    ttsmaker_clear_button.click(fn=clear_ttsmaker_info)  # pylint: disable=E1101
+    ttsmaker_clear_button.click(  # pylint: disable=E1101
+        fn=clear_ttsmaker_info,
+        outputs=[ttsmaker_gender, ttsmaker_queue, ttsmaker_txt_limit, ttsmaker_sample_audio],
+    )
 
     ttsmaker_languages_input.focus(  # pylint: disable=E1101
         fn=get_ttsmaker_languages,
@@ -67,4 +90,10 @@ with gr.Blocks(title="Free TTS API Demo") as ui:
         fn=get_ttsmaker_voices,
         inputs=[ttsmaker_url_input, ttsmaker_token_input, ttsmaker_languages_input],
         outputs=ttsmaker_voices_input,
+    )
+
+    ttsmaker_voices_input.select(  # pylint: disable=E1101
+        fn=get_ttsmaker_single_voice_info,
+        inputs=[ttsmaker_url_input, ttsmaker_token_input, ttsmaker_voices_input],
+        outputs=[ttsmaker_gender, ttsmaker_queue, ttsmaker_txt_limit, ttsmaker_sample_audio],
     )

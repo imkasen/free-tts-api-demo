@@ -48,11 +48,44 @@ def get_ttsmaker_voices(url: str, token: str, language: str) -> gr.Dropdown:
         raise gr.Error(e)
 
 
-def clear_ttsmaker_info():
+def get_ttsmaker_single_voice_info(
+    url: str, token: str, voice_id: int
+) -> tuple[gr.Textbox, gr.Textbox, gr.Textbox, gr.Audio]:
+    """
+    Get detailed voice information based on sepecific voice id.
+
+    :param url: URL of TTSMaker API
+    :param token: developer token
+    :param voice_id: ID of voice selected by user
+    :return: some visible gradio components
+    """
+    if not url:
+        raise gr.Error("URL of TTSMaker API is empty!")
+    if not token:
+        raise gr.Error("Token of TTSMaker API is empty!")
+
+    try:
+        gender, queue, limit, sample_url = TTSMaker.get_detailed_voice_info(url, token, voice_id)
+        return (
+            gr.Textbox(value=gender, visible=True),
+            gr.Textbox(value=queue, visible=True),
+            gr.Textbox(value=limit, visible=True),
+            gr.Audio(value=sample_url, visible=True),
+        )
+    except RuntimeError as e:
+        raise gr.Error(e)
+
+
+def clear_ttsmaker_info() -> tuple[gr.Textbox, gr.Textbox, gr.Textbox, gr.Audio]:
     """
     Clear all stored TTSMaker information
     """
     if TTSMaker.clear_info():
         gr.Warning("Clear all stored TTSMaker information")
-    else:
-        raise gr.Error("Fail to clear TTSMaker information")
+        return (
+            gr.Textbox(visible=False),
+            gr.Textbox(visible=False),
+            gr.Textbox(visible=False),
+            gr.Audio(visible=False),
+        )
+    raise gr.Error("Fail to clear TTSMaker information")

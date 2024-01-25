@@ -55,7 +55,7 @@ class TTSMaker:
     @classmethod
     def get_languages(cls, url: str, token: str) -> list[str]:
         """
-        return supported languages list
+        Get supported languages list
 
         :param url: URL of TTSMaker API
         :param token: developer token
@@ -68,7 +68,7 @@ class TTSMaker:
     @classmethod
     def get_voices(cls, url: str, token: str, language: str) -> list[tuple[str, int]]:
         """
-        return supported voices list
+        Get supported voices list
 
         :param url: URL of TTSMaker API
         :param token: developer token
@@ -81,6 +81,27 @@ class TTSMaker:
             (voice_info["name"], voice_info["id"]) for voice_info in cls.voices_db.search(Query().language == language)
         ]
         return voices_list
+
+    @classmethod
+    def get_detailed_voice_info(cls, url: str, token: str, voice_id: int) -> tuple[str, bool, int, str]:
+        """
+        Get gender, queue, characters list and audio sample url based on voice id.
+
+        :param url: URL of TTSMaker API
+        :param token: developer token
+        :param voice_id: ID of voice selected by user
+        :return: a tuple of informations
+        """
+        if not cls.voices_db.all():
+            cls.get_voice_list(url, token)
+        voice_info: list[dict[str, int | str | bool]] = cls.voices_db.search(Query().id == voice_id)
+        assert len(voice_info) == 1
+        return (
+            "Male" if voice_info[0]["gender"] == 1 else "Female",
+            voice_info[0]["is_need_queue"],
+            voice_info[0]["text_characters_limit"],
+            voice_info[0]["audio_sample_file_url"],
+        )
 
     @classmethod
     def clear_info(cls) -> bool:
