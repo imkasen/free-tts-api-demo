@@ -3,7 +3,13 @@ User Interface
 """
 import gradio as gr
 
-from .ui_logic import clear_ttsmaker_info, get_ttsmaker_languages, get_ttsmaker_single_voice_info, get_ttsmaker_voices
+from .ui_logic import (
+    clear_ttsmaker_info,
+    create_tts_order,
+    get_ttsmaker_languages,
+    get_ttsmaker_single_voice_info,
+    get_ttsmaker_voices,
+)
 
 # Gradio UI
 with gr.Blocks(title="Free TTS API Demo") as ui:
@@ -85,7 +91,7 @@ with gr.Blocks(title="Free TTS API Demo") as ui:
                     interactive=True,
                 )
 
-                ttsmaker_text_pause_time = gr.Slider(
+                ttsmaker_text_paragraph_pause_time = gr.Slider(
                     label="Text Paragraph Pause Time",
                     info="""Auto insert audio paragraph pause time. \
                         unit: second, maximum 50 pauses can be inserted. \
@@ -98,7 +104,11 @@ with gr.Blocks(title="Free TTS API Demo") as ui:
                 )
 
             with gr.Column():
-                ttsmaker_text_input = gr.Textbox(placeholder="Input text here...", container=False)
+                ttsmaker_text_input = gr.Textbox(
+                    placeholder="Input text here...",
+                    lines=7,
+                    container=False,
+                )
                 with gr.Row():
                     ttsmaker_clear_button = gr.ClearButton(value="Clear")
                     ttsmaker_submit_button = gr.Button(value="Submit", variant="primary")
@@ -112,6 +122,7 @@ with gr.Blocks(title="Free TTS API Demo") as ui:
             ttsmaker_queue,
             ttsmaker_txt_limit,
             ttsmaker_sample_audio,
+            ttsmaker_text_input,
         ]
     )
     ttsmaker_clear_button.click(  # pylint: disable=E1101
@@ -135,4 +146,19 @@ with gr.Blocks(title="Free TTS API Demo") as ui:
         fn=get_ttsmaker_single_voice_info,
         inputs=[ttsmaker_url_input, ttsmaker_token_input, ttsmaker_voices_input],
         outputs=[ttsmaker_gender, ttsmaker_queue, ttsmaker_txt_limit, ttsmaker_sample_audio],
+    )
+
+    ttsmaker_submit_button.click(  # pylint: disable=E1101
+        fn=create_tts_order,
+        inputs=[
+            ttsmaker_url_input,
+            ttsmaker_token_input,
+            ttsmaker_text_input,
+            ttsmaker_voices_input,
+            ttsmaker_audio_format,
+            ttsmaker_audio_speed,
+            ttsmaker_audio_volume,
+            ttsmaker_text_paragraph_pause_time,
+        ],
+        outputs=ttsmaker_audio_output,
     )

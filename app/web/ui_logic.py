@@ -76,6 +76,47 @@ def get_ttsmaker_single_voice_info(
         raise gr.Error(e)
 
 
+def create_tts_order(  # pylint: disable=R0913
+    url: str,
+    token: str,
+    text: str,
+    voice_id: int,
+    audio_format: str = "mp3",
+    audio_speed: float = 1.0,
+    audio_volume: float = 0.0,
+    text_paragraph_pause_time: int = 0,
+) -> gr.Audio:
+    """
+    Ready to send post request to generate audio.
+
+    :param url: URL of TTSMaker API
+    :param token: developer token
+    :param text: text content of audio
+    :param voice_id: ID of speaker voice
+    :param audio_format: mp3/ogg/aac/opus/wav, defaults to "mp3"
+    :param audio_speed: range 0.5-2.0, 0.5: 50% speed, 1.0: 100% speed, 2.0: 200% speed, defaults to 1.0
+    :param audio_volume: range 0-10, 1: volume+10%, 8: volume+80%, 10: volume+100%, defaults to 0.0
+    :param text_paragraph_pause_time: auto insert audio paragraph pause time, range 500-5000, unit: millisecond,
+                                        maximum 50 pauses can be inserted. If more than 50 pauses,
+                                        all pauses will be canceled automatically, defaults to 0
+    :return: URL of generated audio
+    """
+    try:
+        generated_audio_url: str = TTSMaker.create_tts_order(
+            url,
+            token,
+            text,
+            voice_id,
+            audio_format,
+            audio_speed,
+            audio_volume,
+            text_paragraph_pause_time * 1000,  # convert seconds to millisecond
+        )
+        return gr.Audio(value=generated_audio_url, interactive=True)
+    except RuntimeError as e:
+        raise gr.Error(e)
+
+
 def clear_ttsmaker_info() -> tuple[gr.Textbox, gr.Textbox, gr.Textbox, gr.Audio]:
     """
     Clear all stored TTSMaker information

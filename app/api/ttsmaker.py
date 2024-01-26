@@ -38,16 +38,14 @@ class TTSMaker:
             params: dict[str, str] = {"token": token}
             res: requests.Response = requests.get(url=f"https://{url}/v1/get-voice-list", params=params, timeout=5)
             if res.status_code == 200:
-                error_code: str = res.json()["error_code"]
-                if not error_code:
+                if res.json()["status"] == "success":
                     cls.language_list = res.json()["support_language_list"]
                     if not cls.voices_db.all():
                         cls.insert_detailed_voices_list(res.json()["voices_detailed_list"])
-                elif error_code in ["TOKEN_ERROR", "LANGUAGE_NOT_FOUND"]:
-                    logger.error(res.json()["error_details"])
                 else:
-                    logger.critical(f"Unknown error code: {error_code}")
-                    raise RuntimeError(f"Unknown error code: {error_code}")
+                    err_msg: str = f"{res.json()['error_code']}: {res.json()['error_details']}"
+                    logger.error(err_msg)
+                    raise RuntimeError(err_msg)
         except requests.exceptions.RequestException as e:
             logger.critical(e)
             raise RuntimeError(e) from e
@@ -102,6 +100,61 @@ class TTSMaker:
             voice_info[0]["text_characters_limit"],
             voice_info[0]["audio_sample_file_url"],
         )
+
+    @classmethod
+    def create_tts_order(  # pylint: disable=R0913
+        cls,
+        url: str,
+        token: str,
+        text: str,
+        voice_id: int,
+        audio_format: str = "mp3",
+        audio_speed: float = 1.0,
+        audio_volume: float = 0.0,
+        text_paragraph_pause_time: int = 0,
+    ) -> str | None:
+        """
+        Send post request to generate audio.
+
+        :param url: URL of TTSMaker API
+        :param token: developer token
+        :param text: text content of audio
+        :param voice_id: ID of speaker voice
+        :param audio_format: mp3/ogg/aac/opus/wav, defaults to "mp3"
+        :param audio_speed: range 0.5-2.0, 0.5: 50% speed, 1.0: 100% speed, 2.0: 200% speed, defaults to 1.0
+        :param audio_volume: range 0-10, 1: volume+10%, 8: volume+80%, 10: volume+100%, defaults to 0.0
+        :param text_paragraph_pause_time: auto insert audio paragraph pause time, range 500-5000, unit: millisecond,
+                                          maximum 50 pauses can be inserted. If more than 50 pauses,
+                                          all pauses will be canceled automatically, defaults to 0
+        :return: URL of generated audio
+        """
+        try:
+            headers: dict[str, str] = {"Content-Type": "application/json; charset=utf-8"}
+            params: dict[str, int | float | str] = {
+                "token": token,
+                "text": text,
+                "voice_id": voice_id,
+                "audio_format": audio_format,
+                "audio_speed": audio_speed,
+                "audio_volume": audio_volume,
+                "text_paragraph_pause_time": text_paragraph_pause_time,
+            }
+            res: requests.Response = requests.post(
+                url=f"https://{url}/v1/create-tts-order",
+                headers=headers,
+                json=params,
+                timeout=5,
+            )
+            if res.status_code == 200:
+                if res.json()["status"] == "success":
+                    return res.json()["audio_file_url"]
+                err_msg: str = f"{res.json()['error_code']}: {res.json()['error_details']}"
+                logger.error(err_msg)
+                raise RuntimeError(err_msg)
+        except requests.exceptions.RequestException as e:
+            logger.critical(e)
+            raise RuntimeError(e) from e
+        return None
 
     @classmethod
     def clear_info(cls) -> bool:
