@@ -66,44 +66,45 @@ with gr.Blocks(title="Free TTS API Demo") as ui:
                     visible=False,
                 )
 
-                ttsmaker_audio_format = gr.Dropdown(
-                    label="Audio Format",
-                    choices=["mp3", "ogg", "acc", "opus", "wav"],
-                    value="mp3",
-                    interactive=True,
-                )
+                with gr.Accordion(label="Advanced Settings", open=False):
+                    ttsmaker_audio_format = gr.Dropdown(
+                        label="Audio Format",
+                        choices=["mp3", "ogg", "acc", "opus", "wav"],
+                        value="mp3",
+                        interactive=True,
+                    )
 
-                ttsmaker_audio_speed = gr.Slider(
-                    label="Audio Speed",
-                    info=r"0.5: 50% speed, 1.0: 100% speed, 2.0: 200% speed",
-                    value=1.0,
-                    minimum=0.5,
-                    maximum=2.0,
-                    step=0.5,
-                    interactive=True,
-                )
+                    ttsmaker_audio_speed = gr.Slider(
+                        label="Audio Speed",
+                        info=r"0.5: 50% speed, 1.0: 100% speed, 2.0: 200% speed",
+                        value=1.0,
+                        minimum=0.5,
+                        maximum=2.0,
+                        step=0.5,
+                        interactive=True,
+                    )
 
-                ttsmaker_audio_volume = gr.Slider(
-                    label="Audio Volume",
-                    info="1: volume + 10%, 8: volume + 80%, 10: volume + 100%",
-                    value=0.0,
-                    minimum=0.0,
-                    maximum=10.0,
-                    step=1.0,
-                    interactive=True,
-                )
+                    ttsmaker_audio_volume = gr.Slider(
+                        label="Audio Volume",
+                        info="1: volume + 10%, 8: volume + 80%, 10: volume + 100%",
+                        value=0.0,
+                        minimum=0.0,
+                        maximum=10.0,
+                        step=1.0,
+                        interactive=True,
+                    )
 
-                ttsmaker_text_paragraph_pause_time = gr.Slider(
-                    label="Text Paragraph Pause Time",
-                    info="""Auto insert audio paragraph pause time. \
-                        unit: second, maximum 50 pauses can be inserted. \
-                        If more than 50 pauses, all pauses will be canceled automatically. """,
-                    value=0.0,
-                    minimum=0.5,
-                    maximum=5.0,
-                    step=0.1,
-                    interactive=True,
-                )
+                    ttsmaker_text_paragraph_pause_time = gr.Slider(
+                        label="Text Paragraph Pause Time",
+                        info="""Auto insert audio paragraph pause time. \
+                            unit: second, maximum 50 pauses can be inserted. \
+                            If more than 50 pauses, all pauses will be canceled automatically. """,
+                        value=0.0,
+                        minimum=0.5,
+                        maximum=5.0,
+                        step=0.1,
+                        interactive=True,
+                    )
 
             with gr.Column():
                 ttsmaker_text_input = gr.Textbox(
