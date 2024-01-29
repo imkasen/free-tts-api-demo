@@ -3,6 +3,7 @@ Some logic funtions needed by Gradio components
 """
 import gradio as gr
 from api import TTSMaker
+from loguru import logger
 
 
 def get_ttsmaker_languages(url: str, token: str) -> gr.Dropdown:
@@ -14,8 +15,10 @@ def get_ttsmaker_languages(url: str, token: str) -> gr.Dropdown:
     :return: list of languages
     """
     if not url:
+        logger.error("URL of TTSMaker API is empty!")
         raise gr.Error("URL of TTSMaker API is empty!")
     if not token:
+        logger.error("Token of TTSMaker API is empty!")
         raise gr.Error("Token of TTSMaker API is empty!")
 
     try:
@@ -35,10 +38,13 @@ def get_ttsmaker_voices(url: str, token: str, language: str) -> gr.Dropdown:
     :return: a list of multiple tuples consisting of names and ids
     """
     if not url:
+        logger.error("URL of TTSMaker API is empty!")
         raise gr.Error("URL of TTSMaker API is empty!")
     if not token:
+        logger.error("Token of TTSMaker API is empty!")
         raise gr.Error("Token of TTSMaker API is empty!")
     if not language:
+        logger.error("Language is not selected!")
         raise gr.Error("Language is not selected!")
 
     try:
@@ -49,19 +55,22 @@ def get_ttsmaker_voices(url: str, token: str, language: str) -> gr.Dropdown:
 
 
 def get_ttsmaker_single_voice_info(
-    url: str, token: str, voice_id: int
-) -> tuple[gr.Textbox, gr.Textbox, gr.Textbox, gr.Audio]:
+    url: str, token: str, voice_id: int, text: str
+) -> tuple[gr.Textbox, gr.Textbox, gr.Textbox, gr.Audio, gr.Markdown]:
     """
     Get detailed voice information based on sepecific voice id.
 
     :param url: URL of TTSMaker API
     :param token: developer token
     :param voice_id: ID of voice selected by user
+    :param text: text content
     :return: some visible gradio components
     """
     if not url:
+        logger.error("URL of TTSMaker API is empty!")
         raise gr.Error("URL of TTSMaker API is empty!")
     if not token:
+        logger.error("Token of TTSMaker API is empty!")
         raise gr.Error("Token of TTSMaker API is empty!")
 
     try:
@@ -71,15 +80,32 @@ def get_ttsmaker_single_voice_info(
             gr.Textbox(value=queue, visible=True),
             gr.Textbox(value=limit, visible=True),
             gr.Audio(value=sample_url, visible=True),
+            refresh_characters_limit(limit, text),
         )
     except RuntimeError as e:
         raise gr.Error(e)
+
+
+def refresh_characters_limit(limit: int, text: str) -> gr.Markdown:
+    """
+    Count remaining characters
+
+    :param limit: maximum allowed characters
+    :param text: current text content
+    :return: Markdown component
+    """
+    left: int = limit - len(text) if (limit - len(text)) >= 0 else 0
+    return gr.Markdown(
+        f"Maximum {limit} input characters, {len(text)} characters already entered, {left} characters remaining.",
+        visible=True,
+    )
 
 
 def create_tts_order(  # pylint: disable=R0913
     url: str,
     token: str,
     text: str,
+    text_limit: float,
     voice_id: int,
     audio_format: str = "mp3",
     audio_speed: float = 1.0,
@@ -101,6 +127,9 @@ def create_tts_order(  # pylint: disable=R0913
                                         all pauses will be canceled automatically, defaults to 0
     :return: URL of generated audio
     """
+    if len(text) > int(text_limit):
+        logger.error("The length of the text content exceeds the character limit!")
+        raise gr.Error("The length of the text content exceeds the character limit!")
     try:
         generated_audio_url: str = TTSMaker.create_tts_order(
             url,
@@ -117,16 +146,19 @@ def create_tts_order(  # pylint: disable=R0913
         raise gr.Error(e)
 
 
-def clear_ttsmaker_info() -> tuple[gr.Textbox, gr.Textbox, gr.Textbox, gr.Audio]:
+def clear_ttsmaker_info() -> tuple[gr.Textbox, gr.Textbox, gr.Textbox, gr.Audio, gr.Markdown]:
     """
     Clear all stored TTSMaker information
     """
     if TTSMaker.clear_info():
+        logger.warning("Clear all stored TTSMaker information")
         gr.Warning("Clear all stored TTSMaker information")
         return (
             gr.Textbox(visible=False),
             gr.Textbox(visible=False),
             gr.Textbox(visible=False),
             gr.Audio(visible=False),
+            gr.Markdown(visible=False),
         )
+    logger.error("Fail to clear TTSMaker information")
     raise gr.Error("Fail to clear TTSMaker information")
