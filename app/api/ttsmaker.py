@@ -157,6 +157,35 @@ class TTSMaker:
         return None
 
     @classmethod
+    def get_token_status(cls, url: str, token: str) -> tuple[int, int, int, float] | None:
+        """
+        Get token information
+
+        :param url: URL of TTSMaker API
+        :param token: developer token
+        :return: a tuple of token status
+        """
+        try:
+            params: dict[str, str] = {"token": token}
+            res: requests.Response = requests.get(url=f"https://{url}/v1/get-token-status", params=params, timeout=5)
+            if res.status_code == 200:
+                if res.json()["status"] == "success":
+                    token_status: dict[str, int | float] = res.json()["token_status"]
+                    return (
+                        token_status["current_cycle_max_characters"],
+                        token_status["current_cycle_characters_used"],
+                        token_status["current_cycle_characters_available"],
+                        token_status["remaining_days_to_reset_quota"],
+                    )
+                err_msg: str = f"{res.json()['error_code']}: {res.json()['error_details']}"
+                logger.error(err_msg)
+                raise RuntimeError(err_msg)
+        except requests.exceptions.RequestException as e:
+            logger.critical(e)
+            raise RuntimeError(e) from e
+        return None
+
+    @classmethod
     def clear_info(cls) -> bool:
         """
         Clear all stored information

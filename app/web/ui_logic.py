@@ -146,6 +146,33 @@ def create_tts_order(  # pylint: disable=R0913
         raise gr.Error(e)
 
 
+def check_token_status(url: str, token: str):
+    """
+    Check and get token status
+
+    :param url: URL of TTSMaker API
+    :param token: developer token
+    :return: some visiable gradio components
+    """
+    if not url:
+        logger.error("URL of TTSMaker API is empty!")
+        raise gr.Error("URL of TTSMaker API is empty!")
+    if not token:
+        logger.error("Token of TTSMaker API is empty!")
+        raise gr.Error("Token of TTSMaker API is empty!")
+
+    try:
+        max_chars, used_chars, avail_chars, left_days = TTSMaker.get_token_status(url, token)
+        return (
+            gr.Textbox(value=max_chars),
+            gr.Textbox(value=used_chars),
+            gr.Textbox(value=avail_chars),
+            gr.Textbox(value=left_days),
+        )
+    except RuntimeError as e:
+        raise gr.Error(e)
+
+
 def clear_ttsmaker_info() -> tuple[gr.Textbox, gr.Textbox, gr.Textbox, gr.Audio, gr.Markdown]:
     """
     Clear all stored TTSMaker information

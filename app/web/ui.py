@@ -4,6 +4,7 @@ User Interface
 import gradio as gr
 
 from .ui_logic import (
+    check_token_status,
     clear_ttsmaker_info,
     create_tts_order,
     get_ttsmaker_languages,
@@ -15,15 +16,11 @@ from .ui_logic import (
 # Gradio UI
 with gr.Blocks(title="Free TTS API Demo") as ui:
     gr.HTML(value="""<h1 align="center">Free TTS API Demo</h1>""")
+
     # TTS Maker
     with gr.Tab(label="TTSMaker"):
         with gr.Row():
             with gr.Column(variant="panel"):
-                ttsmaker_token_input = gr.Textbox(
-                    label="Token",
-                    value="ttsmaker_demo_token",
-                    interactive=True,
-                )
                 ttsmaker_url_input = gr.Radio(
                     label="API URL",
                     info="Select TTSMaker API url based on your localtion.",
@@ -31,6 +28,15 @@ with gr.Blocks(title="Free TTS API Demo") as ui:
                     value="api.ttsmaker.com",
                     interactive=True,
                 )
+
+                ttsmaker_token_input = gr.Textbox(
+                    label="Token",
+                    info="Press the Enter key to get token status",
+                    value="ttsmaker_demo_token",
+                    interactive=True,
+                    max_lines=1,
+                )
+
                 ttsmaker_languages_input = gr.Dropdown(
                     label="languages",
                     info="Select the language you want to use.",
@@ -47,11 +53,13 @@ with gr.Blocks(title="Free TTS API Demo") as ui:
                         label="Gender",
                         interactive=False,
                         visible=False,
+                        max_lines=1,
                     )
                     ttsmaker_queue = gr.Textbox(
                         label="Queue",
                         interactive=False,
                         visible=False,
+                        max_lines=1,
                     )
                     ttsmaker_text_limit = gr.Number(
                         label="Text Characters Limit",
@@ -65,6 +73,33 @@ with gr.Blocks(title="Free TTS API Demo") as ui:
                     interactive=False,
                     visible=False,
                 )
+
+                with gr.Accordion(label="Token Status"):
+                    with gr.Row():
+                        ttsmaker_token_max = gr.Textbox(
+                            label="Max Characters",
+                            info="in current cycle",
+                            interactive=False,
+                            max_lines=1,
+                        )
+                        ttsmaker_token_used = gr.Textbox(
+                            label="Used Characters",
+                            info="in current cycle",
+                            interactive=False,
+                            max_lines=1,
+                        )
+                        ttsmaker_token_available = gr.Textbox(
+                            label="Available Characters",
+                            info="in current cycle",
+                            interactive=False,
+                            max_lines=1,
+                        )
+                        ttsmaker_token_remaining_days = gr.Textbox(
+                            label="Remaining Days",
+                            info="to reset quota",
+                            interactive=False,
+                            max_lines=1,
+                        )
 
                 with gr.Accordion(label="Advanced Settings", open=False):
                     ttsmaker_audio_format = gr.Dropdown(
@@ -128,11 +163,21 @@ with gr.Blocks(title="Free TTS API Demo") as ui:
             ttsmaker_sample_audio,
             ttsmaker_text_input,
             ttsmaker_left_characters,
+            ttsmaker_token_max,
+            ttsmaker_token_used,
+            ttsmaker_token_available,
+            ttsmaker_token_remaining_days,
         ]
     )
     ttsmaker_clear_button.click(  # pylint: disable=E1101
         fn=clear_ttsmaker_info,
         outputs=[ttsmaker_gender, ttsmaker_queue, ttsmaker_text_limit, ttsmaker_sample_audio],
+    )
+
+    ttsmaker_token_input.submit(  # pylint: disable=E1101
+        fn=check_token_status,
+        inputs=[ttsmaker_url_input, ttsmaker_token_input],
+        outputs=[ttsmaker_token_max, ttsmaker_token_used, ttsmaker_token_available, ttsmaker_token_remaining_days],
     )
 
     ttsmaker_languages_input.focus(  # pylint: disable=E1101
