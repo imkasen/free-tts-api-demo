@@ -3,7 +3,7 @@ User Interface
 """
 import gradio as gr
 
-from .ui_logic import (
+from .ttsmaker_logic import (
     check_token_status,
     clear_ttsmaker_info,
     create_tts_order,
