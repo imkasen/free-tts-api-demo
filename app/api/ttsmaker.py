@@ -5,7 +5,7 @@ from typing import NoReturn
 
 import requests
 from loguru import logger
-from tinydb import Query, TinyDB
+from tinydb import TinyDB, where
 from tinydb.storages import MemoryStorage
 
 
@@ -16,15 +16,6 @@ class TTSMaker:
 
     language_list: list[str] = []
     voices_db = TinyDB(storage=MemoryStorage)
-
-    @classmethod
-    def insert_detailed_voices_list(cls, voices_detailed_list: list[dict[str, int | str | bool]]) -> NoReturn:
-        """
-        Store 'voices_detailed_list' into TinyDB.
-
-        :param voices_detailed_list: list containing speaker infomations
-        """
-        cls.voices_db.insert_multiple(voices_detailed_list)
 
     @classmethod
     def get_voice_list(cls, url: str, token: str) -> NoReturn:
@@ -41,7 +32,7 @@ class TTSMaker:
                 if res.json()["status"] == "success":
                     cls.language_list = res.json()["support_language_list"]
                     if not cls.voices_db.all():
-                        cls.insert_detailed_voices_list(res.json()["voices_detailed_list"])
+                        cls.voices_db.insert_multiple(res.json()["voices_detailed_list"])
                 else:
                     err_msg: str = f"{res.json()['error_code']}: {res.json()['error_details']}"
                     logger.error(err_msg)
@@ -76,7 +67,7 @@ class TTSMaker:
         if not cls.voices_db.all():
             cls.get_voice_list(url, token)
         voices_list: list[tuple[str, int]] = [
-            (voice_info["name"], voice_info["id"]) for voice_info in cls.voices_db.search(Query().language == language)
+            (voice_info["name"], voice_info["id"]) for voice_info in cls.voices_db.search(where("language") == language)
         ]
         return voices_list
 
@@ -92,7 +83,7 @@ class TTSMaker:
         """
         if not cls.voices_db.all():
             cls.get_voice_list(url, token)
-        voice_info: list[dict[str, int | str | bool]] = cls.voices_db.search(Query().id == voice_id)
+        voice_info: list[dict[str, int | str | bool]] = cls.voices_db.search(where("id") == voice_id)
         assert len(voice_info) == 1
         return (
             "Male" if voice_info[0]["gender"] == 1 else "Female",

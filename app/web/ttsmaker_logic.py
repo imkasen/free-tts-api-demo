@@ -139,7 +139,7 @@ def create_tts_order(  # pylint: disable=R0913
             audio_format,
             audio_speed,
             audio_volume,
-            text_paragraph_pause_time * 1000,  # convert seconds to millisecond
+            text_paragraph_pause_time,
         )
         return gr.Audio(value=generated_audio_url, interactive=True)
     except RuntimeError as e:

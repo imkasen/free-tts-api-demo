@@ -8,9 +8,8 @@ from loguru import logger
 from web import ui
 
 logger.add(
-    # sink=os.path.join(Path().resolve(), "logs", "{time}.log"),
-    sink=os.path.join(Path().resolve(), "logs", "logger.log"),
-    format="{time:YYYY-MM-DD HH:mm::ss} | {level} | {message}",
+    sink=os.path.join(Path().resolve(), "logs", "{time:YYYY-MM-DD}.log"),
+    format="{time:YYYY-MM-DD HH:mm::ss} | {level} | {name} | {file.path}:{line} | {function} | {message}",
     encoding="utf-8",
     enqueue=True,
     rotation="00:00",

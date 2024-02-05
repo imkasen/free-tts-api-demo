@@ -132,12 +132,12 @@ with gr.Blocks(title="Free TTS API Demo") as ui:
                     ttsmaker_text_paragraph_pause_time = gr.Slider(
                         label="Text Paragraph Pause Time",
                         info="""Auto insert audio paragraph pause time. \
-                            unit: second, maximum 50 pauses can be inserted. \
+                            unit: millisecond, maximum 50 pauses can be inserted. \
                             If more than 50 pauses, all pauses will be canceled automatically. """,
-                        value=0.0,
-                        minimum=0.5,
-                        maximum=5.0,
-                        step=0.1,
+                        value=0,
+                        minimum=500,
+                        maximum=5000,
+                        step=1,
                         interactive=True,
                     )
 
