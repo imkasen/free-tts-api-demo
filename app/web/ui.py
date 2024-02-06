@@ -3,6 +3,7 @@ User Interface
 """
 import gradio as gr
 
+from .edgetts_logic import clear_edgetts_info, get_edgetts_single_voice_info, get_edgetts_voices
 from .ttsmaker_logic import (
     check_token_status,
     clear_ttsmaker_info,
@@ -12,6 +13,8 @@ from .ttsmaker_logic import (
     get_ttsmaker_voices,
     refresh_characters_limit,
 )
+
+# pylint: disable=E1101
 
 # Gradio UI
 with gr.Blocks(title="Free TTS API Demo") as ui:
@@ -169,42 +172,42 @@ with gr.Blocks(title="Free TTS API Demo") as ui:
             ttsmaker_token_remaining_days,
         ]
     )
-    ttsmaker_clear_button.click(  # pylint: disable=E1101
+    ttsmaker_clear_button.click(
         fn=clear_ttsmaker_info,
         outputs=[ttsmaker_gender, ttsmaker_queue, ttsmaker_text_limit, ttsmaker_sample_audio],
     )
 
-    ttsmaker_token_input.submit(  # pylint: disable=E1101
+    ttsmaker_token_input.submit(
         fn=check_token_status,
         inputs=[ttsmaker_url_input, ttsmaker_token_input],
         outputs=[ttsmaker_token_max, ttsmaker_token_used, ttsmaker_token_available, ttsmaker_token_remaining_days],
     )
 
-    ttsmaker_languages_input.focus(  # pylint: disable=E1101
+    ttsmaker_languages_input.focus(
         fn=get_ttsmaker_languages,
         inputs=[ttsmaker_url_input, ttsmaker_token_input],
         outputs=ttsmaker_languages_input,
     )
 
-    ttsmaker_voices_input.focus(  # pylint: disable=E1101
+    ttsmaker_voices_input.focus(
         fn=get_ttsmaker_voices,
         inputs=[ttsmaker_url_input, ttsmaker_token_input, ttsmaker_languages_input],
         outputs=ttsmaker_voices_input,
     )
 
-    ttsmaker_voices_input.select(  # pylint: disable=E1101
+    ttsmaker_voices_input.select(
         fn=get_ttsmaker_single_voice_info,
         inputs=[ttsmaker_url_input, ttsmaker_token_input, ttsmaker_voices_input, ttsmaker_text_input],
         outputs=[ttsmaker_gender, ttsmaker_queue, ttsmaker_text_limit, ttsmaker_sample_audio, ttsmaker_left_characters],
     )
 
-    ttsmaker_text_input.input(  # pylint: disable=E1101
+    ttsmaker_text_input.input(
         fn=refresh_characters_limit,
         inputs=[ttsmaker_text_limit, ttsmaker_text_input],
         outputs=ttsmaker_left_characters,
     )
 
-    ttsmaker_submit_button.click(  # pylint: disable=E1101
+    ttsmaker_submit_button.click(
         fn=create_tts_order,
         inputs=[
             ttsmaker_url_input,
@@ -218,4 +221,82 @@ with gr.Blocks(title="Free TTS API Demo") as ui:
             ttsmaker_text_paragraph_pause_time,
         ],
         outputs=ttsmaker_audio_output,
+    )
+
+    # Edge TTS
+    with gr.Tab(label="Edge TTS"):
+        with gr.Row():
+            with gr.Column(variant="panel"):
+                edgetts_lang_code = gr.Textbox(
+                    label="Language Code",
+                    info="Enter the language code you want to use, e.g. 'en' for English, 'en-US' for American English",
+                    max_lines=1,
+                )
+                edgetts_voices_input = gr.Dropdown(
+                    label="Voices",
+                    info="Select a speaker voice you want to use.",
+                    interactive=True,
+                )
+                with gr.Row():
+                    edgetts_gender = gr.Textbox(
+                        label="Gender",
+                        interactive=False,
+                        max_lines=1,
+                        visible=False,
+                        scale=1,
+                    )
+                    edgetts_content_categories = gr.Textbox(
+                        label="Content Categories",
+                        interactive=False,
+                        max_lines=1,
+                        visible=False,
+                        scale=2,
+                    )
+                    edgetts_voice_personalities = gr.Textbox(
+                        label="Voice Personalities",
+                        interactive=False,
+                        max_lines=1,
+                        visible=False,
+                        scale=1,
+                    )
+
+            with gr.Column():
+                edgetts_text_input = gr.Textbox(
+                    placeholder="Input text here...",
+                    lines=7,
+                    container=False,
+                    interactive=True,
+                )
+                with gr.Row():
+                    edgetts_clear_button = gr.ClearButton(value="Clear")
+                    edgetts_submit_button = gr.Button(value="Submit", variant="primary")
+                edgetts_audio_output = gr.Audio(label="TTS Result", interactive=False)
+
+    edgetts_voices_input.focus(
+        fn=get_edgetts_voices,
+        inputs=edgetts_lang_code,
+        outputs=edgetts_voices_input,
+    )
+
+    edgetts_voices_input.select(
+        fn=get_edgetts_single_voice_info,
+        inputs=edgetts_voices_input,
+        outputs=[edgetts_gender, edgetts_content_categories, edgetts_voice_personalities],
+    )
+
+    edgetts_clear_button.add(
+        components=[
+            edgetts_lang_code,
+            edgetts_voices_input,
+            edgetts_gender,
+            edgetts_content_categories,
+            edgetts_voice_personalities,
+            edgetts_text_input,
+            edgetts_audio_output,
+        ]
+    )
+
+    edgetts_clear_button.click(
+        fn=clear_edgetts_info,
+        outputs=[edgetts_gender, edgetts_content_categories, edgetts_voice_personalities],
     )
