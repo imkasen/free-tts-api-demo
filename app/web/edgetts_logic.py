@@ -2,6 +2,8 @@
 Some logic funtions needed by Gradio components
 """
 
+import asyncio
+
 import gradio as gr
 from api import EdgeTTS
 from loguru import logger
@@ -45,6 +47,25 @@ def get_edgetts_single_voice_info(short_name: str) -> tuple[gr.Textbox, gr.Textb
         )
     except RuntimeError as e:
         raise gr.Error(e)
+
+
+def get_edgetts_audio(text: str, voice: str) -> gr.Audio:
+    """
+    Get audio result from edge-tts
+
+    :param text: content text
+    :param voice: voice speaker name
+    :return: gradio audio component
+    """
+    if not text:
+        logger.error("Audio content text is empty!")
+        raise gr.Error("Audio content text is empty!")
+    if not voice:
+        logger.error("Voice speaker is not selected!")
+        raise gr.Error("Voice speaker is not selected!")
+
+    file_path: str = asyncio.run(EdgeTTS.generate_audio(text, voice))
+    return gr.Audio(value=file_path)
 
 
 def clear_edgetts_info() -> tuple[gr.Textbox, gr.Textbox, gr.Textbox]:

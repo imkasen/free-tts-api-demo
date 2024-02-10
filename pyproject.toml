@@ -1,16 +1,17 @@
 [tool.poetry]
 name = "free-tts-api-demo"
-version = "0.1.0"
+version = "0.2.0"
 description = "Some examples of free TTS API calls for testing and learning."
 authors = ["Kasen"]
 readme = "README.md"
 
 [tool.poetry.dependencies]
-python = "^3.11"
+python = "^3.10"
 requests = "^2.31.0"
 gradio = "^4.13.0"
 loguru = "^0.7.2"
 tinydb = "^4.8.0"
+edge-tts = "^6.1.9"
 
 
 [[tool.poetry.source]]

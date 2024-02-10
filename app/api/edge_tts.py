@@ -2,10 +2,14 @@
 API requests of edge-tts
 """
 
+import os
 import re
+import tempfile
 from typing import NoReturn
 
+import edge_tts
 import requests
+from edge_tts.constants import VOICE_LIST
 from loguru import logger
 from tinydb import TinyDB, where
 from tinydb.storages import MemoryStorage
@@ -16,18 +20,7 @@ class EdgeTTS:
     edge-tts class
     """
 
-    TRUSTED_CLIENT_TOKEN: str = "6A5AA1D4EAFF4E9FB37E23D68491D6F4"
-
-    WSS_URL: str = (
-        "wss://speech.platform.bing.com/consumer/speech/synthesize/readaloud/edge/v1?TrustedClientToken="
-        + TRUSTED_CLIENT_TOKEN
-    )
-
-    VOICE_LIST_URL: str = (
-        "https://speech.platform.bing.com/consumer/speech/synthesize/readaloud/voices/list?trustedclienttoken="
-        + TRUSTED_CLIENT_TOKEN
-    )
-
+    audio_file_path: str = os.path.join(tempfile.gettempdir(), "tmp_edge_tts_audio.mp3")
     voices_db = TinyDB(storage=MemoryStorage)
 
     @classmethod
@@ -50,7 +43,7 @@ class EdgeTTS:
                 "Accept-Encoding": "gzip, deflate, br",
                 "Accept-Language": "en-US,en;q=0.9",
             }
-            res: requests.Response = requests.get(cls.VOICE_LIST_URL, headers=headers, timeout=5)
+            res: requests.Response = requests.get(VOICE_LIST, headers=headers, timeout=5)
             if res.status_code == 200:
                 if not cls.voices_db.all():
                     cls.voices_db.insert_multiple(res.json())
@@ -103,10 +96,25 @@ class EdgeTTS:
             raise RuntimeError(e) from e
 
     @classmethod
+    async def generate_audio(cls, text: str, voice: str) -> str:
+        """
+        Generate temporary audio file using edge-tts
+
+        :param text: audio content text
+        :param voice: voice speaker name
+        :return: audio file path name
+        """
+        communicate = edge_tts.Communicate(text, voice)
+        await communicate.save(cls.audio_file_path)
+        return cls.audio_file_path
+
+    @classmethod
     def clear_info(cls) -> bool:
         """
         Clear all stored information.
         """
         if cls.voices_db.all():
             cls.voices_db.truncate()
-        return not cls.voices_db.all()
+        if os.path.exists(cls.audio_file_path):
+            os.remove(cls.audio_file_path)
+        return (not cls.voices_db.all()) and (not os.path.exists(cls.audio_file_path))
