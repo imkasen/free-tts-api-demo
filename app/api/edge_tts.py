@@ -2,12 +2,11 @@
 API requests of edge-tts
 """
 
-import os
 import re
-import tempfile
-from typing import NoReturn
+from typing import Any, NoReturn
 
 import edge_tts
+import numpy as np
 import requests
 from edge_tts.constants import VOICE_LIST
 from loguru import logger
@@ -20,9 +19,21 @@ class EdgeTTS:
     edge-tts class
     """
 
-    audio_file_name: str = "tmp_edge_tts_audio.mp3"
-    audio_file_path: str = os.path.join(tempfile.gettempdir(), audio_file_name)
     voices_db = TinyDB(storage=MemoryStorage)
+
+    @staticmethod
+    def pad_buffer(audio: str) -> str:
+        """
+        Pad buffer to multiple of 2 bytes
+
+        :param audio: original binary data of audio
+        :return: binary data of audio after padding
+        """
+        buffer_size: int = len(audio)
+        element_size: int = np.dtype(np.int16).itemsize
+        if buffer_size % element_size != 0:
+            audio = audio + b"\0" * (element_size - (buffer_size % element_size))
+        return audio
 
     @classmethod
     def get_voice_list(cls) -> NoReturn:
@@ -97,17 +108,20 @@ class EdgeTTS:
             raise RuntimeError(e) from e
 
     @classmethod
-    async def generate_audio(cls, text: str, voice: str) -> str:
+    async def generate_audio(cls, text: str, voice: str) -> tuple[int, Any]:
         """
         Generate temporary audio file using edge-tts
 
         :param text: audio content text
         :param voice: voice speaker name
-        :return: audio file path name
+        :return: sample rate, audio data
         """
+        audio: str = b""
         communicate = edge_tts.Communicate(text, voice)
-        await communicate.save(cls.audio_file_path)
-        return cls.audio_file_path
+        async for chunk in communicate.stream():
+            if chunk["type"] == "audio":
+                audio += chunk["data"]
+        return (44100, np.frombuffer(cls.pad_buffer(audio), dtype=np.int16))
 
     @classmethod
     def clear_info(cls) -> bool:
@@ -116,6 +130,4 @@ class EdgeTTS:
         """
         if cls.voices_db.all():
             cls.voices_db.truncate()
-        if os.path.exists(cls.audio_file_path):
-            os.remove(cls.audio_file_path)
-        return (not cls.voices_db.all()) and (not os.path.exists(cls.audio_file_path))
+        return not cls.voices_db.all()

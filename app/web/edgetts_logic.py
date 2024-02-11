@@ -3,6 +3,7 @@ Some logic funtions needed by Gradio components
 """
 
 import asyncio
+from typing import Any
 
 import gradio as gr
 from api import EdgeTTS
@@ -49,13 +50,13 @@ def get_edgetts_single_voice_info(short_name: str) -> tuple[gr.Textbox, gr.Textb
         raise gr.Error(e)
 
 
-def get_edgetts_audio(text: str, voice: str) -> gr.Audio:
+def get_edgetts_audio(text: str, voice: str) -> tuple[int, Any]:
     """
     Get audio result from edge-tts
 
     :param text: content text
     :param voice: voice speaker name
-    :return: gradio audio component
+    :return: sample rate, audio data
     """
     if not text:
         logger.error("Audio content text is empty!")
@@ -64,8 +65,7 @@ def get_edgetts_audio(text: str, voice: str) -> gr.Audio:
         logger.error("Voice speaker is not selected!")
         raise gr.Error("Voice speaker is not selected!")
 
-    file_path: str = asyncio.run(EdgeTTS.generate_audio(text, voice))
-    return gr.Audio(value=file_path)
+    return asyncio.run(EdgeTTS.generate_audio(text, voice))
 
 
 def clear_edgetts_info() -> tuple[gr.Textbox, gr.Textbox, gr.Textbox]:

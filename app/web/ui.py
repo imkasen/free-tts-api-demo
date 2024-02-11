@@ -68,7 +68,7 @@ with gr.Blocks(title="Free TTS API Demo") as ui:
                 with gr.Row():
                     edgetts_clear_button = gr.ClearButton(value="Clear")
                     edgetts_submit_button = gr.Button(value="Submit", variant="primary")
-                edgetts_audio_output = gr.Audio(label="TTS Result", interactive=False)
+                edgetts_audio_output = gr.Audio(label="TTS Result", type="numpy", format="mp3")
 
     edgetts_voices_input.focus(
         fn=get_edgetts_voices,
