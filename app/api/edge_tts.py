@@ -20,7 +20,8 @@ class EdgeTTS:
     edge-tts class
     """
 
-    audio_file_path: str = os.path.join(tempfile.gettempdir(), "tmp_edge_tts_audio.mp3")
+    audio_file_name: str = "tmp_edge_tts_audio.mp3"
+    audio_file_path: str = os.path.join(tempfile.gettempdir(), audio_file_name)
     voices_db = TinyDB(storage=MemoryStorage)
 
     @classmethod
