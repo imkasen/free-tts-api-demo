@@ -22,7 +22,7 @@ class EdgeTTS:
     voices_db = TinyDB(storage=MemoryStorage)
 
     @staticmethod
-    def pad_buffer(audio: str) -> str:
+    def pad_buffer(audio: bytes) -> str:
         """
         Pad buffer to multiple of 2 bytes
 
@@ -116,7 +116,7 @@ class EdgeTTS:
         :param voice: voice speaker name
         :return: sample rate, audio data
         """
-        audio: str = b""
+        audio: bytes = b""
         communicate = edge_tts.Communicate(text, voice)
         async for chunk in communicate.stream():
             if chunk["type"] == "audio":

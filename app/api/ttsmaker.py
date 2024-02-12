@@ -83,14 +83,18 @@ class TTSMaker:
         """
         if not cls.voices_db.all():
             cls.get_voice_list(url, token)
-        voice_info: list[dict[str, int | str | bool]] = cls.voices_db.search(where("id") == voice_id)
-        assert len(voice_info) == 1
-        return (
-            "Male" if voice_info[0]["gender"] == 1 else "Female",
-            voice_info[0]["is_need_queue"],
-            voice_info[0]["text_characters_limit"],
-            voice_info[0]["audio_sample_file_url"],
-        )
+        try:
+            voice_info: list[dict[str, int | str | bool]] = cls.voices_db.search(where("id") == voice_id)
+            assert len(voice_info) == 1
+            return (
+                "Male" if voice_info[0]["gender"] == 1 else "Female",
+                voice_info[0]["is_need_queue"],
+                voice_info[0]["text_characters_limit"],
+                voice_info[0]["audio_sample_file_url"],
+            )
+        except KeyError as e:
+            logger.error(e)
+            raise RuntimeError(e) from e
 
     @classmethod
     def create_tts_order(  # pylint: disable=R0913
