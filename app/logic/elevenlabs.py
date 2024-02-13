@@ -2,6 +2,8 @@
 Some logic funtions needed by Gradio components
 """
 
+import datetime
+
 import gradio as gr
 from api import ElevenLabs
 from loguru import logger
@@ -42,6 +44,28 @@ def get_elevenlabs_single_voice_info(
         )
     except RuntimeError as e:
         raise gr.Error(e)
+
+
+def get_elevenlabs_token_status(token: str) -> tuple[gr.Textbox, gr.Textbox, gr.Textbox, gr.Textbox]:
+    """
+    Get token status
+
+    :param token: API token
+    :return: some gradio components
+    """
+    if not token:
+        logger.error("API token is empty!")
+        raise gr.Error("API token is empty!")
+
+    count, limit, unix_timestamp = ElevenLabs.get_token_stauts(token)
+    left: int = limit - count
+    reset_time: str = datetime.datetime.utcfromtimestamp(unix_timestamp).strftime("%Y-%m-%d %H:%M:%S")
+    return (
+        gr.Textbox(value=count),
+        gr.Textbox(value=left),
+        gr.Textbox(value=limit),
+        gr.Textbox(value=reset_time),
+    )
 
 
 def clear_elevenlabs_info() -> tuple[gr.Textbox, gr.Textbox, gr.Textbox, gr.Textbox, gr.Textbox, gr.Audio]:

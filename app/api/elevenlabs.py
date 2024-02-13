@@ -4,7 +4,7 @@ API requests of ElevenLabs
 
 from typing import Any, NoReturn
 
-from elevenlabs.api import Voices
+from elevenlabs.api import API, Subscription, Voices, api_base_url_v1
 from loguru import logger
 from tinydb import TinyDB, where
 from tinydb.storages import MemoryStorage
@@ -65,6 +65,19 @@ class ElevenLabs:
         except KeyError as e:
             logger.error(e)
             raise RuntimeError(e) from e
+
+    @classmethod
+    def get_token_stauts(cls, token: str) -> tuple[int, int, int]:
+        """
+        Get token status
+
+        :param token: API token
+        :return: some token information.
+        """
+        url: str = f"{api_base_url_v1}/user/subscription"
+        resp: dict[str, Any] = API.get(url=url, api_key=token).json()
+        sub_info: Subscription = Subscription(**resp)
+        return sub_info.character_count, sub_info.character_limit, sub_info.next_character_count_reset_unix
 
     @classmethod
     def clear_info(cls) -> bool:

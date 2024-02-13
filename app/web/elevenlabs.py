@@ -2,7 +2,12 @@
 ElevenLabs Gradio UI
 """
 import gradio as gr
-from logic.elevenlabs import clear_elevenlabs_info, get_elevenlabs_single_voice_info, get_elevenlabs_voices
+from logic.elevenlabs import (
+    clear_elevenlabs_info,
+    get_elevenlabs_single_voice_info,
+    get_elevenlabs_token_status,
+    get_elevenlabs_voices,
+)
 
 # pylint: disable=E1101
 
@@ -11,7 +16,7 @@ with gr.Tab(label="ElevenLabs"):
         with gr.Column(variant="panel"):
             elevenlabs_token_input = gr.Textbox(
                 label="API Token",
-                info="Enter your xi-api-key here. Press the Enter key to get token status.",
+                info="Fill in your xi-api-key here. Press Enter to get token status.",
                 interactive=True,
                 max_lines=1,
                 type="password",
@@ -69,6 +74,33 @@ with gr.Tab(label="ElevenLabs"):
                     visible=False,
                 )
 
+            with gr.Accordion(label="Token Status", open=True):
+                with gr.Row():
+                    elevenlabs_used_characters = gr.Textbox(
+                        label="Count",
+                        info="used characters",
+                        max_lines=1,
+                        interactive=False,
+                    )
+                    elevenlabs_characters_left = gr.Textbox(
+                        label="Available",
+                        info="remaining characters",
+                        max_lines=1,
+                        interactive=False,
+                    )
+                    elevenlabs_characters_limit = gr.Textbox(
+                        label="Limit",
+                        info="character limit",
+                        max_lines=1,
+                        interactive=False,
+                    )
+                    elevenlabs_characters_reset_time = gr.Textbox(
+                        label="Time",
+                        info="quota reset time (UTC)",
+                        max_lines=1,
+                        interactive=False,
+                    )
+
             with gr.Accordion(label="Voice Settings", open=False):
                 elevenlabs_stability = gr.Slider(
                     label="Stability",
@@ -121,6 +153,17 @@ with gr.Tab(label="ElevenLabs"):
                 elevenlabs_submit_button = gr.Button(value="Submit", variant="primary")
             elevenlabs_audio_output = gr.Audio(label="TTS Result", type="numpy", format="mp3", interactive=False)
 
+elevenlabs_token_input.submit(
+    fn=get_elevenlabs_token_status,
+    inputs=elevenlabs_token_input,
+    outputs=[
+        elevenlabs_used_characters,
+        elevenlabs_characters_left,
+        elevenlabs_characters_limit,
+        elevenlabs_characters_reset_time,
+    ],
+)
+
 elevenlabs_voices_input.focus(
     fn=get_elevenlabs_voices,
     outputs=elevenlabs_voices_input,
@@ -148,6 +191,10 @@ elevenlabs_clear_button.add(
         elevenlabs_description,
         elevenlabs_usecase,
         elevenlabs_sample_audio,
+        elevenlabs_used_characters,
+        elevenlabs_characters_left,
+        elevenlabs_characters_limit,
+        elevenlabs_characters_reset_time,
         elevenlabs_text_input,
         elevenlabs_audio_output,
     ]
