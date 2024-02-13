@@ -11,11 +11,19 @@ with gr.Tab(label="ElevenLabs"):
         with gr.Column(variant="panel"):
             elevenlabs_token_input = gr.Textbox(
                 label="API Token",
-                info="Enter your xi-api-key here.",
+                info="Enter your xi-api-key here. Press the Enter key to get token status.",
                 interactive=True,
                 max_lines=1,
                 type="password",
             )
+
+            elevenlabs_model = gr.Radio(
+                label="Model",
+                choices=["eleven_multilingual_v2"],
+                value="eleven_multilingual_v2",
+                interactive=False,
+            )
+
             elevenlabs_voices_input = gr.Dropdown(
                 label="Voices",
                 info="Select a speaker voice you want to use.",
@@ -59,6 +67,46 @@ with gr.Tab(label="ElevenLabs"):
                     label="Preview Sample",
                     interactive=False,
                     visible=False,
+                )
+
+            with gr.Accordion(label="Voice Settings", open=False):
+                elevenlabs_stability = gr.Slider(
+                    label="Stability",
+                    info="""How stable the voice is.
+                        Lowering this slider introduces a broader emotional range for the voice.
+                        Setting it too high can lead to a monotonous voice with limited emotion.""",
+                    value=0.71,
+                    minimum=0.0,
+                    maximum=1.0,
+                    interactive=True,
+                )
+                elevenlabs_similarity = gr.Slider(
+                    label="Similarity",
+                    info="How closely the AI should adhere to the original voice when attempting to replicate it.",
+                    value=0.5,
+                    minimum=0.0,
+                    maximum=1.0,
+                    interactive=True,
+                )
+                elevenlabs_style = gr.Slider(
+                    label="Style Exaggeration",
+                    info="""It attempts to amplify the style of the original speaker.
+                        It does consume additional computational resources and
+                        might increase latency if set to anything other than 0.
+                        In general, we recommend keeping this setting at 0 at all times.""",
+                    value=0.0,
+                    minimum=0.0,
+                    maximum=1.0,
+                    interactive=True,
+                )
+                elevenlabs_spaker_boost = gr.Radio(
+                    label="Speaker Boost",
+                    info="""It boosts the similarity to the original speaker.
+                        It requires a slightly higher computational load,
+                        which in turn increases latency.""",
+                    choices=["True", "False"],
+                    value="True",
+                    interactive=True,
                 )
 
         with gr.Column():
