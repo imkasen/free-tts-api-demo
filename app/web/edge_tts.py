@@ -2,18 +2,25 @@
 Edge TTS Gradio UI
 """
 import gradio as gr
-from logic.edgetts import clear_edgetts_info, get_edgetts_audio, get_edgetts_single_voice_info, get_edgetts_voices
+from logic.edgetts import (
+    clear_edgetts_info,
+    get_edgetts_audio,
+    get_edgetts_language_code,
+    get_edgetts_single_voice_info,
+    get_edgetts_voices,
+)
 
 # pylint: disable=E1101
 
 with gr.Tab(label="Edge TTS"):
     with gr.Row():
         with gr.Column(variant="panel"):
-            edgetts_lang_code = gr.Textbox(
+            edgetts_language_code = gr.Dropdown(
                 label="Language Code",
-                info="Enter the language code you want to use, e.g. 'en' for English, 'en-US' for American English",
-                max_lines=1,
+                info="Select the language code you want to use.",
+                interactive=True,
             )
+
             edgetts_voices_input = gr.Dropdown(
                 label="Voices",
                 info="Select a speaker voice you want to use.",
@@ -54,9 +61,14 @@ with gr.Tab(label="Edge TTS"):
                 edgetts_submit_button = gr.Button(value="Submit", variant="primary")
             edgetts_audio_output = gr.Audio(label="TTS Result", type="numpy", format="mp3")
 
+edgetts_language_code.focus(
+    fn=get_edgetts_language_code,
+    outputs=edgetts_language_code,
+)
+
 edgetts_voices_input.focus(
     fn=get_edgetts_voices,
-    inputs=edgetts_lang_code,
+    inputs=edgetts_language_code,
     outputs=edgetts_voices_input,
 )
 
@@ -72,7 +84,7 @@ edgetts_submit_button.click(
 
 edgetts_clear_button.add(
     components=[
-        edgetts_lang_code,
+        edgetts_language_code,
         edgetts_voices_input,
         edgetts_gender,
         edgetts_content_categories,

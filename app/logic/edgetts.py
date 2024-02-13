@@ -10,6 +10,19 @@ from api import EdgeTTS
 from loguru import logger
 
 
+def get_edgetts_language_code() -> gr.Dropdown:
+    """
+    Get language list of edge-tts
+
+    :return: a gradio dropdown component
+    """
+    try:
+        language_list: list[str] = EdgeTTS.get_language_code()
+        return gr.Dropdown(choices=language_list)
+    except RuntimeError as e:
+        raise gr.Error(e)
+
+
 def get_edgetts_voices(lang_code: str) -> gr.Dropdown:
     """
     Get the list of voices available for the specified language code.

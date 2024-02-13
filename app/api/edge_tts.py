@@ -2,7 +2,6 @@
 API requests of edge-tts
 """
 
-import re
 from typing import Any, NoReturn
 
 import edge_tts
@@ -19,6 +18,7 @@ class EdgeTTS:
     edge-tts class
     """
 
+    language_code_list: list[str] = []
     voices_db = TinyDB(storage=MemoryStorage)
 
     @staticmethod
@@ -59,9 +59,25 @@ class EdgeTTS:
             if res.status_code == 200:
                 if not cls.voices_db.all():
                     cls.voices_db.insert_multiple(res.json())
-        except requests.exceptions.RequestException as e:
+                if not cls.language_code_list:
+                    for voice in res.json():
+                        language_code: str = voice["Locale"]
+                        if language_code not in cls.language_code_list:
+                            cls.language_code_list.append(language_code)
+        except (requests.exceptions.RequestException, KeyError) as e:
             logger.critical(e)
             raise RuntimeError(e) from e
+
+    @classmethod
+    def get_language_code(cls) -> list[str]:
+        """
+        Get language code of edge-tts
+
+        :return: a list of language code
+        """
+        if not cls.language_code_list:
+            cls.get_voice_list()
+        return cls.language_code_list
 
     @classmethod
     def get_voices(cls, lang_code: str) -> list[tuple[str, str]]:
@@ -75,8 +91,7 @@ class EdgeTTS:
             cls.get_voice_list()
         try:
             voices_list: list[tuple[str, str]] = []
-            reg_str: str = f"(.)*{lang_code}(.)*"
-            for voice in cls.voices_db.search(where("Locale").matches(reg_str, flags=re.IGNORECASE)):
+            for voice in cls.voices_db.search(where("Locale") == lang_code):
                 voices_list.append((voice["FriendlyName"], voice["ShortName"]))
             return voices_list
         except KeyError as e:
@@ -128,6 +143,8 @@ class EdgeTTS:
         """
         Clear all stored information.
         """
+        if cls.language_code_list:
+            cls.language_code_list = []
         if cls.voices_db.all():
             cls.voices_db.truncate()
-        return not cls.voices_db.all()
+        return (not cls.language_code_list) and (not cls.voices_db.all())

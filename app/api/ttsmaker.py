@@ -37,7 +37,7 @@ class TTSMaker:
                     err_msg: str = f"{res.json()['error_code']}: {res.json()['error_details']}"
                     logger.error(err_msg)
                     raise RuntimeError(err_msg)
-        except requests.exceptions.RequestException as e:
+        except (requests.exceptions.RequestException, KeyError) as e:
             logger.critical(e)
             raise RuntimeError(e) from e
 
