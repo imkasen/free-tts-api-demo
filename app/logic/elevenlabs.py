@@ -3,6 +3,7 @@ Some logic funtions needed by Gradio components
 """
 
 import datetime
+from typing import Any
 
 import gradio as gr
 from api import ElevenLabs
@@ -65,6 +66,51 @@ def get_elevenlabs_token_status(token: str) -> tuple[gr.Textbox, gr.Textbox, gr.
         gr.Textbox(value=left),
         gr.Textbox(value=limit),
         gr.Textbox(value=reset_time),
+    )
+
+
+def get_elevenlabs_audio(  # pylint: disable=R0913
+    token: str,
+    text: str,
+    voice_id: str,
+    model: str,
+    stability: float,
+    similarity: float,
+    style: float,
+    speaker_boost: bool,
+) -> tuple[int, Any]:
+    """
+    Get audio data
+
+    :param token: API token
+    :param text: text content
+    :param voice_id: voice speaker id
+    :param model: model name
+    :param stability: stability value
+    :param similarity: similarity value
+    :param style: style value
+    :param speaker_boost: use speaker boost value
+    :return: sample rate, audio data
+    """
+    if not token:
+        logger.error("Token is empty!")
+        raise gr.Error("Token is empty!")
+    if not text:
+        logger.error("Text content is empty!")
+        raise gr.Error("Text content is empty!")
+    if not voice_id:
+        logger.error("Voice speaker is not selected!")
+        raise gr.Error("Voice speaker is not selected!")
+
+    return ElevenLabs.generate_audio(
+        token,
+        text,
+        voice_id,
+        model,
+        stability,
+        similarity,
+        style,
+        speaker_boost,
     )
 
 

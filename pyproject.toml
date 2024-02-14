@@ -1,6 +1,6 @@
 [tool.poetry]
 name = "free-tts-api-demo"
-version = "0.2.0"
+version = "0.3.0"
 description = "Some examples of free TTS API calls for testing and learning."
 authors = ["Kasen"]
 readme = "README.md"

@@ -4,6 +4,7 @@ ElevenLabs Gradio UI
 import gradio as gr
 from logic.elevenlabs import (
     clear_elevenlabs_info,
+    get_elevenlabs_audio,
     get_elevenlabs_single_voice_info,
     get_elevenlabs_token_status,
     get_elevenlabs_voices,
@@ -180,6 +181,21 @@ elevenlabs_voices_input.select(
         elevenlabs_usecase,
         elevenlabs_sample_audio,
     ],
+)
+
+elevenlabs_submit_button.click(
+    fn=get_elevenlabs_audio,
+    inputs=[
+        elevenlabs_token_input,
+        elevenlabs_text_input,
+        elevenlabs_voices_input,
+        elevenlabs_model,
+        elevenlabs_stability,
+        elevenlabs_similarity,
+        elevenlabs_style,
+        elevenlabs_spaker_boost,
+    ],
+    outputs=elevenlabs_audio_output,
 )
 
 elevenlabs_clear_button.add(
