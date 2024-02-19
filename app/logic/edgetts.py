@@ -6,8 +6,23 @@ import asyncio
 from typing import Any
 
 import gradio as gr
+import numpy as np
 from api import EdgeTTS
 from loguru import logger
+
+
+def pad_buffer(audio: bytes) -> bytes:
+    """
+    Pad buffer to multiple of 2 bytes
+
+    :param audio: original binary data of audio
+    :return: binary data of audio after padding
+    """
+    buffer_size: int = len(audio)
+    element_size: int = np.dtype(np.int16).itemsize
+    if buffer_size % element_size != 0:
+        audio = audio + b"\0" * (element_size - (buffer_size % element_size))
+    return audio
 
 
 def get_edgetts_language_code() -> gr.Dropdown:
@@ -78,7 +93,8 @@ def get_edgetts_audio(text: str, voice: str) -> tuple[int, Any]:
         logger.error("Voice speaker is not selected!")
         raise gr.Error("Voice speaker is not selected!")
 
-    return asyncio.run(EdgeTTS.generate_audio(text, voice))
+    audio_data: bytes = asyncio.run(EdgeTTS.generate_audio(text, voice))
+    return 44100, np.frombuffer(pad_buffer(audio_data), dtype=np.int16)
 
 
 def clear_edgetts_info() -> tuple[gr.Textbox, gr.Textbox, gr.Textbox]:

@@ -4,7 +4,6 @@ API requests of ElevenLabs
 
 from typing import Any, NoReturn
 
-import numpy as np
 from elevenlabs import API, Subscription, Voice, Voices, VoiceSettings, api_base_url_v1, generate
 from loguru import logger
 from tinydb import TinyDB, where
@@ -18,20 +17,6 @@ class ElevenLabs:
 
     voices_name_list: list[tuple[str, str]] = []
     voices_db = TinyDB(storage=MemoryStorage)
-
-    @staticmethod
-    def pad_buffer(audio: bytes) -> str:
-        """
-        Pad buffer to multiple of 2 bytes
-
-        :param audio: original binary data of audio
-        :return: binary data of audio after padding
-        """
-        buffer_size: int = len(audio)
-        element_size: int = np.dtype(np.int16).itemsize
-        if buffer_size % element_size != 0:
-            audio = audio + b"\0" * (element_size - (buffer_size % element_size))
-        return audio
 
     @classmethod
     def get_voice_list(cls) -> NoReturn:
@@ -105,7 +90,7 @@ class ElevenLabs:
         similarity: float = 0.5,
         style: float = 0.0,
         speaker_boost: bool = True,
-    ) -> tuple[int, Any]:
+    ) -> bytes:
         """
         Generate audio
 
@@ -127,7 +112,7 @@ class ElevenLabs:
         )
         voice = Voice(voice_id=voice_id, settings=settings)
         audio: bytes = generate(text=text, api_key=token, model=model, voice=voice)
-        return (44100, np.frombuffer(cls.pad_buffer(audio), dtype=np.int16))
+        return audio
 
     @classmethod
     def clear_info(cls) -> bool:

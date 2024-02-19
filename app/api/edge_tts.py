@@ -2,10 +2,9 @@
 API requests of edge-tts
 """
 
-from typing import Any, NoReturn
+from typing import NoReturn
 
 import edge_tts
-import numpy as np
 import requests
 from edge_tts.constants import VOICE_LIST
 from loguru import logger
@@ -20,20 +19,6 @@ class EdgeTTS:
 
     language_code_list: list[str] = []
     voices_db = TinyDB(storage=MemoryStorage)
-
-    @staticmethod
-    def pad_buffer(audio: bytes) -> str:
-        """
-        Pad buffer to multiple of 2 bytes
-
-        :param audio: original binary data of audio
-        :return: binary data of audio after padding
-        """
-        buffer_size: int = len(audio)
-        element_size: int = np.dtype(np.int16).itemsize
-        if buffer_size % element_size != 0:
-            audio = audio + b"\0" * (element_size - (buffer_size % element_size))
-        return audio
 
     @classmethod
     def get_voice_list(cls) -> NoReturn:
@@ -123,7 +108,7 @@ class EdgeTTS:
             raise RuntimeError(e) from e
 
     @classmethod
-    async def generate_audio(cls, text: str, voice: str) -> tuple[int, Any]:
+    async def generate_audio(cls, text: str, voice: str) -> bytes:
         """
         Generate temporary audio file using edge-tts
 
@@ -136,7 +121,7 @@ class EdgeTTS:
         async for chunk in communicate.stream():
             if chunk["type"] == "audio":
                 audio += chunk["data"]
-        return (44100, np.frombuffer(cls.pad_buffer(audio), dtype=np.int16))
+        return audio
 
     @classmethod
     def clear_info(cls) -> bool:

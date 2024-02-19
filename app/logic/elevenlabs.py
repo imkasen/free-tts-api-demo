@@ -6,8 +6,23 @@ import datetime
 from typing import Any
 
 import gradio as gr
+import numpy as np
 from api import ElevenLabs
 from loguru import logger
+
+
+def pad_buffer(audio: bytes) -> bytes:
+    """
+    Pad buffer to multiple of 2 bytes
+
+    :param audio: original binary data of audio
+    :return: binary data of audio after padding
+    """
+    buffer_size: int = len(audio)
+    element_size: int = np.dtype(np.int16).itemsize
+    if buffer_size % element_size != 0:
+        audio = audio + b"\0" * (element_size - (buffer_size % element_size))
+    return audio
 
 
 def get_elevenlabs_voices() -> gr.Dropdown:
@@ -102,7 +117,7 @@ def get_elevenlabs_audio(  # pylint: disable=R0913
         logger.error("Voice speaker is not selected!")
         raise gr.Error("Voice speaker is not selected!")
 
-    return ElevenLabs.generate_audio(
+    audio_data: bytes = ElevenLabs.generate_audio(
         token,
         text,
         voice_id,
@@ -112,6 +127,7 @@ def get_elevenlabs_audio(  # pylint: disable=R0913
         style,
         speaker_boost,
     )
+    return 44100, np.frombuffer(pad_buffer(audio_data), dtype=np.int16)
 
 
 def clear_elevenlabs_info() -> tuple[gr.Textbox, gr.Textbox, gr.Textbox, gr.Textbox, gr.Textbox, gr.Audio]:
