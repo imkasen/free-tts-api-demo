@@ -116,7 +116,7 @@ class EdgeTTS:
         :param voice: voice speaker name
         :return: sample rate, audio data
         """
-        audio: bytes = b""
+        audio: bytes = bytes()
         communicate = edge_tts.Communicate(text, voice)
         async for chunk in communicate.stream():
             if chunk["type"] == "audio":
